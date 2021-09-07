@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable
+            name="apodViewModel"
+            type="com.nasa.astronomypicture.viewmodel.ApodViewModel" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".MainActivity">
+
+        <ImageView
+            android:id="@+id/apodImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher_background"
+            app:loadImage="@{apodViewModel.currentApodDataModel.hdurl}" />
+
+        <WebView
+            android:id="@+id/apodVideo"
+            android:layout_width="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_height="match_parent"/>
+
+        <LinearLayout
+            android:id="@+id/buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:background="#FFFFFFFF"
+            android:layout_alignParentRight="true"
+            android:orientation="horizontal"
+            android:padding="5dp">
+
+            <ImageView
+                android:id="@+id/calender"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="5dp"
+                android:layout_weight="1"
+                android:src="@drawable/calendar"
+                android:onClick="calender"/>
+
+            <ImageView
+                android:id="@+id/favourite"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="5dp"
+                android:src="@drawable/favorite_unmark"
+                android:onClick="@{()->apodViewModel.toggleFavourite()}"/>
+
+            <ImageView
+                android:id="@+id/favouritelist"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:padding="5dp"
+                android:src="@drawable/favlisticon"
+                android:onClick="favlist"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:scrollbars="vertical"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:layout_above="@id/copyright"
+            android:text="@={apodViewModel.currentApodDataModel.explanation}"/>
+
+        <TextView
+            android:id="@+id/copyright"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:maxLines="1"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:padding="5dp"
+            android:text="@={apodViewModel.currentApodDataModel.copyright}"/>
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:padding="5dp"
+            android:layout_toLeftOf="@id/buttons"
+            android:text="@={apodViewModel.currentApodDataModel.title}"/>
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/title"
+            android:maxLines="1"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:paddingLeft="5dp"
+            android:text="@={apodViewModel.currentApodDataModel.date}"/>
+
+        <FrameLayout
+            android:id="@+id/calenderParent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_centerInParent="true"
+            android:background="#AAFFFFFF">
+            <CalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_below="@id/buttons"
+                android:layout_margin="10dp"/>
+        </FrameLayout>
+
+        <RelativeLayout
+            android:id="@+id/listParent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#AAFFFFFF"
+            android:visibility="gone"
+            android:layout_below="@id/buttons"
+            android:layout_margin="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:textSize="18sp"
+                android:padding="5dp"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"
+                android:text="Favourites"/>
+
+            <ImageView
+                android:id="@+id/clerall"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_margin="10dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/delete"
+                android:onClick="clearall"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/clerall"
+                android:layout_margin="10dp" />
+        </RelativeLayout>
+    </RelativeLayout>
+</layout>
