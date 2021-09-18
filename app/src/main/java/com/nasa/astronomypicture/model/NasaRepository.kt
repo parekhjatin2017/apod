@@ -26,15 +26,25 @@ class NasaRepository(private val dao: ApodDao, private val apodService : ApodRes
         return dao.getApodOnID(id)
     }
 
-    fun getApodOnDate(date : String): Flow<List<ApodDataModel>> {
-        return dao.getApodOnDate("%$date%")
-    }
-
     suspend fun getApodFromService(date : String): Response<ApodDataModel> {
         return apodService.getApodData(RetrofitInstance.API_KEY, date)
     }
 
     suspend fun getTodaysApodFromService(): Response<ApodDataModel> {
         return apodService.getTodaysApodData(RetrofitInstance.API_KEY)
+    }
+
+    suspend fun getApod(date : String) : ApodDataModel?{
+        val list = dao.getApodOnDate("%$date%")
+        return if(list == null || list.isEmpty()){
+            val resp = getApodFromService(date)
+            if(resp.isSuccessful){
+                resp.body()
+            }else{
+                null
+            }
+        }else{
+            list[0]
+        }
     }
 }

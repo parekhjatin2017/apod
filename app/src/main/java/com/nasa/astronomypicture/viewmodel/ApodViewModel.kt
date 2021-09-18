@@ -21,8 +21,6 @@ class ApodViewModel(private val repository: NasaRepository) : ViewModel() {
 
     var isVideo = MutableLiveData<Boolean>()
 
-    private var todaysApodDataModel : ApodDataModel? = null
-
     companion object {
 
         @JvmStatic
@@ -43,18 +41,15 @@ class ApodViewModel(private val repository: NasaRepository) : ViewModel() {
 
     private fun updateCurrentApodDataModel(model : ApodDataModel){
         currentApodDataModel.value = model
-        if(model.date.equals(getToday())){
-            todaysApodDataModel = model
-        }
         setFavourite()
         isVideo.value = currentApodDataModel.value?.media_type?.let { it.equals("video", true) }
     }
 
     fun toggleFavourite(){
         if(isFavourite.value == true){
-            unCheckFavourite()
+            currentApodDataModel.value?.let { unCheckFavourite(it) }
         }else{
-            markFavourite()
+            currentApodDataModel.value?.let { markFavourite(it) }
         }
     }
 
@@ -62,8 +57,8 @@ class ApodViewModel(private val repository: NasaRepository) : ViewModel() {
         isFavourite.value = currentApodDataModel.value?.id?.let { it > 0 }
     }
 
-    private fun markFavourite() = viewModelScope.launch {
-        val row = currentApodDataModel.value?.let { repository.insert(it) }
+    fun markFavourite(model : ApodDataModel) = viewModelScope.launch {
+        val row = repository.insert(model)
         if (row != null && row > -1) {
             currentApodDataModel.value?.id = row
             getAllFavourites()
@@ -74,12 +69,10 @@ class ApodViewModel(private val repository: NasaRepository) : ViewModel() {
         }
     }
 
-    private fun unCheckFavourite() = viewModelScope.launch {
-        val row = currentApodDataModel.value?.let { repository.removeFavourites(it) }
+    fun unCheckFavourite(model : ApodDataModel) = viewModelScope.launch {
+        val row = repository.removeFavourites(model)
         if (row != null && row > 0) {
-            currentApodDataModel.value?.id = -1
-            getAllFavourites()
-            setFavourite()
+            model.id = 0
             statusMessage.value = Event("Removed from favourites")
         } else {
             statusMessage.value = Event("Error Occurred")
@@ -96,19 +89,11 @@ class ApodViewModel(private val repository: NasaRepository) : ViewModel() {
         val noOfRowsDeleted = repository.deleteAll()
         if (noOfRowsDeleted > 0) {
             getAllFavourites()
+            currentApodDataModel.value?.id = 0
+            setFavourite()
             statusMessage.value = Event("Removed all favourites")
         } else {
             statusMessage.value = Event("Error Occurred")
-        }
-    }
-
-    fun getApodFromdb(date : String){
-        viewModelScope.launch {
-            repository.getApodOnDate(date).collect {
-                if (it.isNotEmpty()) {
-                    updateCurrentApodDataModel(it[0])
-                }
-            }
         }
     }
 
@@ -124,50 +109,12 @@ class ApodViewModel(private val repository: NasaRepository) : ViewModel() {
 
     fun getApod(date : String) {
         viewModelScope.launch {
-            repository.getApodOnDate(date).collect {
-                if (it.isEmpty()) {
-                    getApodFromNetwork(date)
-                } else {
-                    updateCurrentApodDataModel(it[0])
-                }
-            }
-        }
-    }
-
-    private fun getApodFromNetwork(date : String) {
-        viewModelScope.launch{
-            val response = repository.getApodFromService(date)
-            if(response.isSuccessful){
-                response.body()?.let {
-                    updateCurrentApodDataModel(it)
-                }
+            val apod = repository.getApod(date)
+            if(apod == null){
+                statusMessage.value = Event("Error Occurred")
             }else{
-                statusMessage.value = Event(response.message())
+                updateCurrentApodDataModel(apod)
             }
         }
-    }
-
-    /*fun getApodFromNetwork() {
-        viewModelScope.launch{
-            val response = repository.getTodaysApodFromService()
-            if(response.isSuccessful){
-                response.body()?.let {
-                    todaysApodDataModel = it
-                    if(currentApodDataModel.value == null){
-                        updateCurrentApodDataModel(it)
-                    }
-                }
-            }else{
-                statusMessage.value = Event(response.message())
-            }
-        }
-    }*/
-
-    fun getTodaysApod(){
-        getApod(getToday())
-    }
-
-    fun getToday() : String{
-        return SimpleDateFormat("yyyy-MM-dd").format(Date())
     }
 }

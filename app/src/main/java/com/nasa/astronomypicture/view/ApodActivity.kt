@@ -19,8 +19,8 @@ import com.nasa.astronomypicture.R
 import com.nasa.astronomypicture.databinding.ActivityMainBinding
 import com.nasa.astronomypicture.viewmodel.ApodViewModel
 import com.nasa.astronomypicture.viewmodel.NasaViewModelFactory
-import okhttp3.Cache
-import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class ApodActivity : AppCompatActivity() {
@@ -32,9 +32,8 @@ class ApodActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        val cache = Cache(File(cacheDir, "apod"), (5 * 1024 * 1024).toLong()) // 5MB
         val retService = RetrofitInstance
-            .getInstance(cache)
+            .getInstance(this)
             .create(ApodRestService::class.java)
 
         val dao = NasaDatabase.getInstance(application).apodDao
@@ -53,6 +52,7 @@ class ApodActivity : AppCompatActivity() {
         apodViewModel.isFavourite.observe(this, Observer {
             val res = if(it == null || !it) R.drawable.favorite_unmark else R.drawable.favorite_mark
             binding.favourite.setImageResource(res)
+            hideAll()
         })
         binding.apodVideo.settings.javaScriptEnabled = true
         apodViewModel.isVideo.observe(this, {
@@ -69,18 +69,23 @@ class ApodActivity : AppCompatActivity() {
         })
         initRecyclerView()
 
-        apodViewModel.getToday()
+        apodViewModel.getApod(getToday())
         binding.calendarView
-            .setOnDateChangeListener { view, year, month, dayOfMonth ->
+            .setOnDateChangeListener { _, year, month, dayOfMonth ->
                 val date = year.toString() + "-" + (month + 1) + "-" + dayOfMonth
                 apodViewModel.getApod(date)
+                hideAll()
             }
     }
 
     private fun initRecyclerView() {
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = FavouriteApodAdapter { selectedItem: ApodDataModel ->
-            listItemClicked(selectedItem)
+        adapter = FavouriteApodAdapter { selectedItem: ApodDataModel, action : ACTION ->
+            if(action == ACTION.ITEM_CLICK){
+                apodViewModel.getApodOnID(selectedItem.id)
+            }else if(action == ACTION.ITEM_DELETE){
+                apodViewModel.unCheckFavourite(selectedItem)
+            }
         }
         binding.recyclerView.adapter = adapter
         displayFavouriteList()
@@ -93,21 +98,27 @@ class ApodActivity : AppCompatActivity() {
         })
     }
 
-    private fun listItemClicked(model: ApodDataModel) {
-        apodViewModel.getApodOnID(model.id)
-    }
-
     fun calender(view : View){
         binding.calenderParent.visibility = if(binding.calenderParent.visibility == View.VISIBLE) View.INVISIBLE else View.VISIBLE
-        binding.listParent.visibility = View.GONE
+        binding.listParent.visibility = View.INVISIBLE
     }
 
     fun favlist(view : View){
         binding.listParent.visibility = if(binding.listParent.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        binding.calenderParent.visibility = View.INVISIBLE
     }
 
-    fun clearall(view : View){
+    fun clearAll(view : View){
         apodViewModel.clearAll()
+        hideAll()
     }
 
+    private fun getToday() : String{
+        return SimpleDateFormat("yyyy-MM-dd").format(Date())
+    }
+
+    private fun hideAll(){
+        binding.listParent.visibility = View.INVISIBLE
+        binding.calenderParent.visibility = View.INVISIBLE
+    }
 }

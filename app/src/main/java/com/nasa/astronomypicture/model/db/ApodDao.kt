@@ -23,6 +23,6 @@ interface ApodDao {
     fun getApodOnID(id: Long): Flow<List<ApodDataModel>>
 
     @Query("SELECT * FROM fav_apod_table WHERE date LIKE :date")
-    fun getApodOnDate(date: String): Flow<List<ApodDataModel>>
+    suspend fun getApodOnDate(date: String): List<ApodDataModel>
 
 }

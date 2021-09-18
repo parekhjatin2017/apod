@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:background="@color/black"
         tools:context=".MainActivity">
 
         <ImageView
@@ -20,7 +21,6 @@
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_background"
             app:loadImage="@{apodViewModel.currentApodDataModel.hdurl}" />
 
         <WebView
@@ -119,7 +119,7 @@
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:layout_centerInParent="true"
-            android:background="#AAFFFFFF">
+            android:background="#FFFFFF">
             <CalendarView
                 android:id="@+id/calendarView"
                 android:layout_width="match_parent"
@@ -132,7 +132,7 @@
             android:id="@+id/listParent"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#AAFFFFFF"
+            android:background="#FFFFFF"
             android:visibility="gone"
             android:layout_below="@id/buttons"
             android:layout_margin="10dp">
@@ -155,7 +155,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
                 android:src="@drawable/delete"
-                android:onClick="clearall"/>
+                android:onClick="clearAll"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
