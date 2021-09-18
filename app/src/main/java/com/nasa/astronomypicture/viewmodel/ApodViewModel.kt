@@ -54,16 +54,21 @@ class ApodViewModel(private val repository: NasaRepository) : ViewModel() {
     }
 
     private fun setFavourite(){
-        isFavourite.value = currentApodDataModel.value?.id?.let { it > 0 }
+        val isFav = currentApodDataModel.value?.id?.let { it > 0 }
+        isFavourite.value = isFav!!
     }
 
-    fun markFavourite(model : ApodDataModel) = viewModelScope.launch {
+    private fun markFavourite(model : ApodDataModel) = viewModelScope.launch {
         val row = repository.insert(model)
-        if (row != null && row > -1) {
-            currentApodDataModel.value?.id = row
+        if (row != null && row > 0) {
+            val isCurrent = model.id == currentApodDataModel.value?.id
+            model?.id = row
+            if(isCurrent){
+                currentApodDataModel.value?.id = row
+                setFavourite()
+            }
             getAllFavourites()
             statusMessage.value = Event("Added to favourites")
-            setFavourite()
         } else {
             statusMessage.value = Event("Error Occurred")
         }
@@ -72,7 +77,13 @@ class ApodViewModel(private val repository: NasaRepository) : ViewModel() {
     fun unCheckFavourite(model : ApodDataModel) = viewModelScope.launch {
         val row = repository.removeFavourites(model)
         if (row != null && row > 0) {
-            model.id = 0
+            val isCurrent = model.id == currentApodDataModel.value?.id
+            model?.id = 0
+            if(isCurrent){
+                currentApodDataModel.value?.id = 0
+                setFavourite()
+            }
+            getAllFavourites()
             statusMessage.value = Event("Removed from favourites")
         } else {
             statusMessage.value = Event("Error Occurred")
