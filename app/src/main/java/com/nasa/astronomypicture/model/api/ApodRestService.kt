@@ -11,6 +11,4 @@ interface ApodRestService {
     @GET("apod?")
     suspend fun getApodData(@Query("api_key")api_key: String, @Query(value = "date") date: String): Response<ApodDataModel>
 
-    @GET("apod?")
-    suspend fun getTodaysApodData(@Query("api_key")api_key: String): Response<ApodDataModel>
 }

@@ -14,7 +14,6 @@ class RetrofitInstance {
 
     companion object {
 
-        const val API_KEY = "kH0OQm8bmOBiWMWWUF6UbLmJYmwof6LiKG6bEDkf"
         const val BASE_URL: String = "https://api.nasa.gov/planetary/"
 
         fun getInstance(context: Context): Retrofit {

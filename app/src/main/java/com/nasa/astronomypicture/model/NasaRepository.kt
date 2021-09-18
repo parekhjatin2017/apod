@@ -8,6 +8,7 @@ import retrofit2.Response
 
 class NasaRepository(private val dao: ApodDao, private val apodService : ApodRestService) {
 
+    private val API_KEY = "kH0OQm8bmOBiWMWWUF6UbLmJYmwof6LiKG6bEDkf"
     val favApodDataModel = dao.getAllFavourites()
 
     suspend fun insert(model: ApodDataModel): Long {
@@ -26,12 +27,8 @@ class NasaRepository(private val dao: ApodDao, private val apodService : ApodRes
         return dao.getApodOnID(id)
     }
 
-    suspend fun getApodFromService(date : String): Response<ApodDataModel> {
-        return apodService.getApodData(RetrofitInstance.API_KEY, date)
-    }
-
-    suspend fun getTodaysApodFromService(): Response<ApodDataModel> {
-        return apodService.getTodaysApodData(RetrofitInstance.API_KEY)
+    private suspend fun getApodFromService(date : String): Response<ApodDataModel> {
+        return apodService.getApodData(API_KEY, date)
     }
 
     suspend fun getApod(date : String) : ApodDataModel?{
